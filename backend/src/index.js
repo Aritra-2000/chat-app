@@ -37,7 +37,7 @@ app.use("/api/v1/messages", messagesRoute);
 // Production configuration
 if (process.env.NODE_ENV === "production") {
   // Serve static files
-  const staticPath = path.join(__dirname, "../frontend/dist");
+  const staticPath = path.join(__dirname, "./frontend/dist");
   
   app.use(express.static(staticPath));
   
