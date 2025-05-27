@@ -5,17 +5,19 @@ import express from "express";
 const app = express();
 const server = http.createServer(app);
 
+const userSocketMap = {};
+
 export function getReceiverSocketId(userId){
     return userSocketMap[userId]
 }
 
 const io = new Server(server, {
     cors:{
-        origin:["http://localhost:5173"],
+        origin:[process.env.CLIENT_URL || "http://localhost:5173"],
+        methods:["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        credentials: true
     },
 });
-
-const userSocketMap = {};
 
 io.on("connection", (socket) =>{
     console.log("A user connected", socket.id);
@@ -23,6 +25,11 @@ io.on("connection", (socket) =>{
     const userId = socket.handshake.query.userId;
 
     if(userId) userSocketMap[userId] = socket.id;
+
+    if (userId && userId !== "undefined") {
+        userSocketMap[userId] = socket.id;
+        console.log("User socket map:", userSocketMap);
+    }
 
     
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
