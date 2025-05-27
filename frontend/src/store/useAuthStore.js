@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { io } from "socket.io-client"
 
 const BASE_URL = import.meta.env.VITE_API_URL;
-
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5001";
 
 export const useAuthStore = create((set, get) => ({
   authUser: null,
@@ -84,23 +84,36 @@ export const useAuthStore = create((set, get) => ({
     }
   },
     
-  connectSocket: () =>{
-    
-    const {authUser} = get();
-    if(!authUser|| get().socket?.connected) return;
+  connectSocket: () => {
+    const { authUser } = get();
+    if (!authUser || get().socket?.connected) return;
 
-    const socket = io(BASE_URL,{
-      query:{
+    const socket = io(SOCKET_URL, {
+      query: {
         userId: authUser._id,
-      }
+      },
+      transports: ['websocket', 'polling'], // Fallback to polling
+      timeout: 20000,
     });
-    socket.connect();
 
-    set({socket: socket});
+    set({ socket: socket });
 
-    socket.on("getOnlineUsers", (userIds)=>{
-      set({onlineUsers: userIds});
-    })
+    socket.on("connect", () => {
+      console.log("Connected to Socket.IO server:", socket.id);
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("Socket connection failed:", error);
+      toast.error("Unable to connect to chat server");
+    });
+
+    socket.on("disconnect", (reason) => {
+      console.log("Socket disconnected:", reason);
+    });
+
+    socket.on("getOnlineUsers", (userIds) => {
+      set({ onlineUsers: userIds });
+    });
   },
 
   disconnectSocket: () =>{
