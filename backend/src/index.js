@@ -22,19 +22,17 @@ const PORT = process.env.PORT; // Add fallback port
 app.use(express.json());
 app.use(cookieParser());
 app.use(
-  cors({
-    origin: process.env.NODE_ENV === "production" 
-      ? process.env.FRONTEND_URL 
-      : "http://localhost:5173",
-    credentials: true,
-  })
+    cors({
+      origin: process.env.CLIENT_URL,
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization']
+    })
 );
 
-// Routes
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/messages", messagesRoute);
 
-// Production configuration
 if (process.env.NODE_ENV === "production") {
   // Serve static files
   const staticPath = path.join(__dirname, "../frontend/dist");
