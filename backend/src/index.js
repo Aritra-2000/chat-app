@@ -11,10 +11,8 @@ import { app, server } from "./lib/socket.js";
 // Configure environment variables
 dotenv.config();
 
+const PORT = process.env.PORT || 5001; 
 
-const PORT = process.env.PORT || 5001; // Add fallback port
-
-// Middleware
 app.use(express.json());
 app.use(cookieParser());
 app.use(
